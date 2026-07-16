@@ -122,6 +122,7 @@ PACKAGES=(
     xwayland
     dbus-user-session
     wlr-randr
+    unclutter-xfixes
     fonts-liberation
     fonts-noto-core
     fonts-noto-color-emoji
@@ -314,6 +315,18 @@ ${WLR_RANDR_BIN} \
 
 "\$HOME/kiosk/monitor.sh" &
 "\$HOME/kiosk/start-kiosk.sh" &
+
+# Mauszeiger unter XWayland nach 0,5 Sekunden Inaktivitaet ausblenden.
+# Die Display-Nummer wird automatisch aus dem XWayland-Socket ermittelt.
+/bin/sh -c '
+sleep 12
+for socket in /tmp/.X11-unix/X*; do
+    [ -S "\$socket" ] || continue
+    number="\${socket##*/X}"
+    DISPLAY=":\$number" /usr/bin/unclutter -idle 0.5 -root &
+    break
+done
+' >>"\$HOME/kiosk/logs/unclutter.log" 2>&1 &
 EOF
 chmod 0755 "$KIOSK_HOME/.config/labwc/autostart"
 
